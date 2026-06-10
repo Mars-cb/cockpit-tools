@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Cockpit Tools
+Comment=AI Tools Desktop Client
+Exec=cockpit-tools %U
+Icon=com.jlcodes.cockpit-tools
+Terminal=false
+Type=Application
+Categories=Network;WebDevelopment;Development;
+Keywords=AI;Copilot;Claude;Gemini;Cursor;Windsurf;
+StartupWMClass=Cockpit Tools
+MimeType=x-scheme-handler/cockpit-tools;x-scheme-handler/cockpittools;

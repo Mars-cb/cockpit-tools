@@ -1,0 +1,61 @@
+name: Build Flatpak
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  flatpak:
+    runs-on: ubuntu-latest
+    container:
+      image: bilelmoussaoui/flatpak-github-actions:gnome-46
+      options: --privileged
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Sync version
+        run: npm run sync-version
+
+      - name: Build Flatpak
+        uses: bilelmoussaoui/flatpak-github-actions/build-flatpak@v6
+        with:
+          manifest-path: flatpak/com.jlcodes.cockpit-tools.json
+          app-id: com.jlcodes.cockpit-tools
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cockpit-tools-flatpak
+          path: com.jlcodes.cockpit-tools.flatpak
+          retention-days: 30
+
+      - name: Get version
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Upload to Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: com.jlcodes.cockpit-tools.flatpak
+          body: "Cockpit Tools Flatpak Bundle - Compatible with all Linux distributions (including UOS/Deepin)"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,73 @@
+{
+  "app-id": "com.jlcodes.cockpit-tools",
+  "runtime": "org.gnome.Platform",
+  "runtime-version": "46",
+  "sdk": "org.gnome.Sdk",
+  "sdk-extensions": [
+    "org.freedesktop.Sdk.Extension.rust-stable",
+    "org.freedesktop.Sdk.Extension.node20",
+    "org.freedesktop.Sdk.Extension.golang"
+  ],
+  "command": "cockpit-tools",
+  "finish-args": [
+    "--share=ipc",
+    "--share=network",
+    "--socket=fallback-x11",
+    "--socket=wayland",
+    "--device=dri",
+    "--filesystem=home",
+    "--filesystem=xdg-documents",
+    "--filesystem=xdg-download",
+    "--talk-name=org.freedesktop.Notifications",
+    "--talk-name=org.kde.StatusNotifierWatcher",
+    "--own-name=org.kde.*",
+    "--env=WEBKIT_DISABLE_COMPOSITING_MODE=1"
+  ],
+  "build-options": {
+    "append-path": "/usr/lib/sdk/rust-stable/bin:/usr/lib/sdk/node20/bin:/usr/lib/sdk/golang/bin",
+    "env": {
+      "CARGO_HOME": "/run/build/cockpit-tools/cargo",
+      "npm_config_nodedir": "/usr/lib/sdk/node20",
+      "GOPATH": "/run/build/cockpit-tools/go",
+      "GOROOT": "/usr/lib/sdk/golang"
+    }
+  },
+  "modules": [
+    {
+      "name": "cockpit-tools",
+      "buildsystem": "simple",
+      "build-options": {
+        "env": {
+          "COCKPIT_SKIP_CLIPROXY_BUILD": "0"
+        }
+      },
+      "build-commands": [
+        "# Create sidecar bin directory",
+        "mkdir -p sidecars/cockpit-cliproxy/bin",
+        "# Build frontend",
+        "npm ci",
+        "npm run build",
+        "# Build Rust app (build.rs will compile Go sidecar automatically)",
+        "cd src-tauri && cargo build --release",
+        "# Find and install sidecar",
+        "SIDECAR=$(find ../sidecars/cockpit-cliproxy/bin -type f -name 'cockpit-cliproxy*' | head -1)",
+        "install -Dm755 \"$SIDECAR\" /app/bin/cockpit-cliproxy",
+        "# Install main binary",
+        "install -Dm755 target/release/cockpit-tools /app/bin/cockpit-tools",
+        "# Install icons",
+        "install -Dm644 src-tauri/icons/256x256.png /app/share/icons/hicolor/256x256/apps/com.jlcodes.cockpit-tools.png",
+        "install -Dm644 src-tauri/icons/128x128.png /app/share/icons/hicolor/128x128/apps/com.jlcodes.cockpit-tools.png",
+        "install -Dm644 src-tauri/icons/64x64.png /app/share/icons/hicolor/64x64/apps/com.jlcodes.cockpit-tools.png",
+        "install -Dm644 src-tauri/icons/32x32.png /app/share/icons/hicolor/32x32/apps/com.jlcodes.cockpit-tools.png",
+        "# Install desktop file",
+        "install -Dm644 flatpak/com.jlcodes.cockpit-tools.desktop /app/share/applications/com.jlcodes.cockpit-tools.desktop"
+      ],
+      "sources": [
+        {
+          "type": "dir",
+          "path": "."
+        }
+      ]
+    }
+  ]
+}

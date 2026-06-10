@@ -37,6 +37,9 @@
       "name": "cockpit-tools",
       "buildsystem": "simple",
       "build-options": {
+        "build-args": [
+          "--share=network"
+        ],
         "env": {
           "COCKPIT_SKIP_CLIPROXY_BUILD": "0"
         }
@@ -50,10 +53,10 @@
         "# Build Rust app (build.rs will compile Go sidecar automatically)",
         "cd src-tauri && cargo build --release",
         "# Find and install sidecar",
-        "SIDECAR=$(find ../sidecars/cockpit-cliproxy/bin -type f -name 'cockpit-cliproxy*' | head -1)",
+        "SIDECAR=$(find sidecars/cockpit-cliproxy/bin -type f -name 'cockpit-cliproxy*' | head -1)",
         "install -Dm755 \"$SIDECAR\" /app/bin/cockpit-cliproxy",
         "# Install main binary",
-        "install -Dm755 target/release/cockpit-tools /app/bin/cockpit-tools",
+        "install -Dm755 src-tauri/target/release/cockpit-tools /app/bin/cockpit-tools",
         "# Install icons",
         "install -Dm644 src-tauri/icons/256x256.png /app/share/icons/hicolor/256x256/apps/com.jlcodes.cockpit-tools.png",
         "install -Dm644 src-tauri/icons/128x128.png /app/share/icons/hicolor/128x128/apps/com.jlcodes.cockpit-tools.png",
@@ -65,7 +68,7 @@
       "sources": [
         {
           "type": "dir",
-          "path": "."
+          "path": ".."
         }
       ]
     }

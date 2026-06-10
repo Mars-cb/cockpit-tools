@@ -39,6 +39,13 @@ src-tauri/arms_cache/
 arms.biz.trace.*
 sidecars/cockpit-cliproxy/bin/
 
+# Flatpak local build artifacts
+.flatpak-builder/
+.flatpak-check/
+flatpak_app/
+repo/
+*.flatpak
+
 # Swift native menu build artifacts
 src-tauri/native/macos-native-menu/.build/
 .tmp/
